@@ -1,12 +1,11 @@
 package com.waiting.flow.controller;
 
+import com.waiting.flow.dto.AllowUserResponse;
+import com.waiting.flow.dto.AllowedUserResponse;
 import com.waiting.flow.dto.RegisterUserResponse;
 import com.waiting.flow.service.UserQueueService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
 
 @RestController
@@ -22,5 +21,23 @@ public class UserQueueController {
     ) {
         return userQueueService.registerWaitQueue(queue, userId)
                 .map(RegisterUserResponse::new);
+    }
+
+    @PostMapping("/allow")
+    public Mono<AllowUserResponse> allowUser (
+            @RequestParam(name = "count") Long count,
+            @RequestParam(name = "queue", defaultValue = "default") String queue
+    ) {
+        return userQueueService.allowUser(queue, count)
+                .map(allowed -> new AllowUserResponse(count, allowed));
+    }
+
+    @GetMapping("/allowed")
+    public Mono<AllowedUserResponse> isAllowedUser (
+            @RequestParam(name = "user_id") Long userId,
+            @RequestParam(name = "queue", defaultValue = "default") String queue
+    ) {
+        return userQueueService.isAllowed(queue, userId)
+                .map(AllowedUserResponse::new);
     }
 }
